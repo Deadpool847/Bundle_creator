@@ -335,115 +335,117 @@ async def process_bundle(
         raise HTTPException(status_code=404, detail="Project not found")
     
     try:
-        # Create temporary directory for processing
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
+        # Create permanent storage directory for this bundle
+        bundles_dir = Path("/app/bundles")
+        project_bundle_dir = bundles_dir / project_id
+        project_bundle_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create bundle structure
+        raw_dir = project_bundle_dir / "01_Raw_Images"
+        platform_dir = project_bundle_dir / "02_Platform_Ready"
+        wallpaper_dir = project_bundle_dir / "03_Wallpapers"
+        video_dir = project_bundle_dir / "04_Promo_Video"
+        
+        raw_dir.mkdir(exist_ok=True)
+        platform_dir.mkdir(exist_ok=True)
+        wallpaper_dir.mkdir(exist_ok=True)
+        video_dir.mkdir(exist_ok=True)
+        
+        processed_images = []
+        
+        # Process each uploaded image
+        for idx, image_file in enumerate(images):
+            # Save original image
+            image_data = await image_file.read()
+            original_image = Image.open(io.BytesIO(image_data))
             
-            # Create bundle structure
-            bundle_dir = temp_path / "bundle"
-            bundle_dir.mkdir()
+            # Convert to RGB if necessary
+            if original_image.mode != 'RGB':
+                original_image = original_image.convert('RGB')
             
-            raw_dir = bundle_dir / "01_Raw_Images"
-            platform_dir = bundle_dir / "02_Platform_Ready"
-            wallpaper_dir = bundle_dir / "03_Wallpapers"
-            video_dir = bundle_dir / "04_Promo_Video"
+            # Enhance image quality
+            enhanced_image = enhance_image_quality(original_image)
             
-            raw_dir.mkdir()
-            platform_dir.mkdir()
-            wallpaper_dir.mkdir()
-            video_dir.mkdir()
+            # Save enhanced raw image
+            raw_filename = f"raw_{idx+1:03d}_{image_file.filename}"
+            raw_path = raw_dir / raw_filename
+            enhanced_image.save(raw_path, "PNG", quality=100)
+            processed_images.append(str(raw_path))
             
-            processed_images = []
-            
-            # Process each uploaded image
-            for idx, image_file in enumerate(images):
-                # Save original image
-                image_data = await image_file.read()
-                original_image = Image.open(io.BytesIO(image_data))
-                
-                # Convert to RGB if necessary
-                if original_image.mode != 'RGB':
-                    original_image = original_image.convert('RGB')
-                
-                # Enhance image quality
-                enhanced_image = enhance_image_quality(original_image)
-                
-                # Save enhanced raw image
-                raw_filename = f"raw_{idx+1:03d}_{image_file.filename}"
-                raw_path = raw_dir / raw_filename
-                enhanced_image.save(raw_path, "PNG", quality=100)
-                processed_images.append(str(raw_path))
-                
-                # Create platform-specific versions
-                for platform in project['platforms']:
-                    if platform in PLATFORM_SPECS:
-                        platform_spec_dir = platform_dir / platform
-                        platform_spec_dir.mkdir(exist_ok=True)
+            # Create platform-specific versions
+            for platform in project['platforms']:
+                if platform in PLATFORM_SPECS:
+                    platform_spec_dir = platform_dir / platform
+                    platform_spec_dir.mkdir(exist_ok=True)
+                    
+                    for product_type, dimensions in PLATFORM_SPECS[platform].items():
+                        resized_image = smart_resize_for_platform(enhanced_image, dimensions)
                         
-                        for product_type, dimensions in PLATFORM_SPECS[platform].items():
-                            resized_image = smart_resize_for_platform(enhanced_image, dimensions)
-                            
-                            # Apply additional enhancement for specific products
-                            if 'phone' in product_type.lower():
-                                # Extra sharpness for mobile displays
-                                enhancer = ImageEnhance.Sharpness(resized_image)
-                                resized_image = enhancer.enhance(1.3)
-                            
-                            filename = f"{platform}_{product_type}_{idx+1:03d}.png"
-                            file_path = platform_spec_dir / filename
-                            resized_image.save(file_path, "PNG", quality=100, dpi=(300, 300))
-                
-                # Create wallpaper versions
-                mobile_dir = wallpaper_dir / "mobile"
-                desktop_dir = wallpaper_dir / "desktop"
-                mobile_dir.mkdir(exist_ok=True)
-                desktop_dir.mkdir(exist_ok=True)
-                
-                # Mobile wallpapers
-                for quality, dimensions in PLATFORM_SPECS['mobile_wallpapers'].items():
-                    mobile_image = smart_resize_for_platform(enhanced_image, dimensions)
-                    mobile_filename = f"mobile_{quality}_{idx+1:03d}.png"
-                    mobile_path = mobile_dir / mobile_filename
-                    mobile_image.save(mobile_path, "PNG", quality=100)
-                
-                # Desktop wallpapers
-                for quality, dimensions in PLATFORM_SPECS['desktop_wallpapers'].items():
-                    desktop_image = smart_resize_for_platform(enhanced_image, dimensions)
-                    desktop_filename = f"desktop_{quality}_{idx+1:03d}.png"
-                    desktop_path = desktop_dir / desktop_filename
-                    desktop_image.save(desktop_path, "PNG", quality=100)
+                        # Apply additional enhancement for specific products
+                        if 'phone' in product_type.lower():
+                            # Extra sharpness for mobile displays
+                            enhancer = ImageEnhance.Sharpness(resized_image)
+                            resized_image = enhancer.enhance(1.3)
+                        
+                        filename = f"{platform}_{product_type}_{idx+1:03d}.png"
+                        file_path = platform_spec_dir / filename
+                        resized_image.save(file_path, "PNG", quality=100, dpi=(300, 300))
             
-            # Create promo video
-            video_output = video_dir / "promo_video.mp4"
-            music_path = None
+            # Create wallpaper versions
+            mobile_dir = wallpaper_dir / "mobile"
+            desktop_dir = wallpaper_dir / "desktop"
+            mobile_dir.mkdir(exist_ok=True)
+            desktop_dir.mkdir(exist_ok=True)
             
-            if music:
-                music_data = await music.read()
-                music_path = temp_path / f"music_{music.filename}"
-                with open(music_path, "wb") as f:
-                    f.write(music_data)
+            # Mobile wallpapers
+            for quality, dimensions in PLATFORM_SPECS['mobile_wallpapers'].items():
+                mobile_image = smart_resize_for_platform(enhanced_image, dimensions)
+                mobile_filename = f"mobile_{quality}_{idx+1:03d}.png"
+                mobile_path = mobile_dir / mobile_filename
+                mobile_image.save(mobile_path, "PNG", quality=100)
             
-            video_created = create_slideshow_video(
-                processed_images[:10],  # Use first 10 images max
-                str(video_output),
-                str(music_path) if music_path else None
-            )
-            
-            if not video_created:
-                # Create a simple text file if video creation fails
-                with open(video_dir / "video_creation_failed.txt", "w") as f:
-                    f.write("Video creation encountered an issue. Please check the logs.")
-            
-            # Generate license file
-            license_content = generate_license_file().format(
-                date=datetime.now().strftime("%Y-%m-%d"),
-                bundle_id=project_id
-            )
-            with open(bundle_dir / "LICENSE.txt", "w") as f:
-                f.write(license_content)
-            
-            # Create SEO keywords file
-            seo_file_content = f"""
+            # Desktop wallpapers
+            for quality, dimensions in PLATFORM_SPECS['desktop_wallpapers'].items():
+                desktop_image = smart_resize_for_platform(enhanced_image, dimensions)
+                desktop_filename = f"desktop_{quality}_{idx+1:03d}.png"
+                desktop_path = desktop_dir / desktop_filename
+                desktop_image.save(desktop_path, "PNG", quality=100)
+        
+        # Create promo video
+        video_output = video_dir / "promo_video.mp4"
+        music_path = None
+        
+        if music:
+            music_data = await music.read()
+            music_path = project_bundle_dir / f"temp_music_{music.filename}"
+            with open(music_path, "wb") as f:
+                f.write(music_data)
+        
+        video_created = create_slideshow_video(
+            processed_images[:10],  # Use first 10 images max
+            str(video_output),
+            str(music_path) if music_path else None
+        )
+        
+        # Clean up temp music file
+        if music_path and music_path.exists():
+            music_path.unlink()
+        
+        if not video_created:
+            # Create a simple text file if video creation fails
+            with open(video_dir / "video_creation_failed.txt", "w") as f:
+                f.write("Video creation encountered an issue. Please check the logs.")
+        
+        # Generate license file
+        license_content = generate_license_file().format(
+            date=datetime.now().strftime("%Y-%m-%d"),
+            bundle_id=project_id
+        )
+        with open(project_bundle_dir / "LICENSE.txt", "w") as f:
+            f.write(license_content)
+        
+        # Create SEO keywords file
+        seo_file_content = f"""
 SEO KEYWORDS AND SUGGESTIONS
 
 Keywords: {', '.join(project['seo_keywords'])}
@@ -458,34 +460,38 @@ Description Templates:
 - Medium: Professional {project['name']} digital collection featuring {len(images)} high-resolution designs. Includes commercial license for unlimited use on Etsy, Redbubble, and other POD platforms.
 - Long: Complete {project['name']} digital bundle featuring {len(images)} professionally enhanced designs. Each image is optimized for multiple platforms including Redbubble, Etsy, TeePublic, and more. Includes mobile/desktop wallpapers, platform-ready files, and commercial license for unlimited business use. Instant download, print-ready files at 300 DPI.
 """
-            with open(bundle_dir / "SEO_KEYWORDS.txt", "w") as f:
-                f.write(seo_file_content)
-            
-            # Create ZIP file in memory
-            zip_buffer = io.BytesIO()
-            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                for file_path in bundle_dir.rglob('*'):
-                    if file_path.is_file():
-                        arcname = file_path.relative_to(bundle_dir)
-                        zipf.write(file_path, arcname)
-            
-            zip_buffer.seek(0)
-            zip_content = zip_buffer.getvalue()
-            
-            # Update project status
-            await db.bundle_projects.update_one(
-                {"id": project_id}, 
-                {"$set": {"status": "completed", "completed_at": datetime.utcnow()}}
-            )
-            
-            # Return the ZIP file as streaming response
-            from fastapi.responses import Response
-            return Response(
-                content=zip_content,
-                media_type="application/zip",
-                headers={"Content-Disposition": f"attachment; filename={project['name']}_bundle.zip"}
-            )
-            
+        with open(project_bundle_dir / "SEO_KEYWORDS.txt", "w") as f:
+            f.write(seo_file_content)
+        
+        # Create ZIP file and save it permanently
+        zip_filename = f"{project['name'].replace(' ', '_')}_bundle.zip"
+        zip_path = project_bundle_dir / zip_filename
+        
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for file_path in project_bundle_dir.rglob('*'):
+                if file_path.is_file() and file_path != zip_path:
+                    arcname = file_path.relative_to(project_bundle_dir)
+                    zipf.write(file_path, arcname)
+        
+        # Update project status with file information
+        await db.bundle_projects.update_one(
+            {"id": project_id}, 
+            {"$set": {
+                "status": "completed", 
+                "completed_at": datetime.utcnow(),
+                "zip_filename": zip_filename,
+                "file_size": zip_path.stat().st_size
+            }}
+        )
+        
+        return {
+            "message": "Bundle created successfully!",
+            "project_id": project_id,
+            "zip_filename": zip_filename,
+            "file_size": zip_path.stat().st_size,
+            "download_url": f"/api/bundles/{project_id}/download"
+        }
+        
     except Exception as e:
         logging.error(f"Bundle processing error: {e}")
         await db.bundle_projects.update_one(
@@ -493,6 +499,31 @@ Description Templates:
             {"$set": {"status": "failed", "error": str(e)}}
         )
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+
+@api_router.get("/bundles/{project_id}/download")
+async def download_bundle(project_id: str):
+    """Download a completed bundle"""
+    
+    # Get project from database
+    project = await db.bundle_projects.find_one({"id": project_id})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    if project['status'] != 'completed':
+        raise HTTPException(status_code=400, detail="Bundle is not ready for download")
+    
+    # Check if ZIP file exists
+    zip_filename = project.get('zip_filename', f"{project['name'].replace(' ', '_')}_bundle.zip")
+    zip_path = Path("/app/bundles") / project_id / zip_filename
+    
+    if not zip_path.exists():
+        raise HTTPException(status_code=404, detail="Bundle file not found")
+    
+    return FileResponse(
+        path=str(zip_path),
+        filename=zip_filename,
+        media_type="application/zip"
+    )
 
 @api_router.get("/bundles", response_model=List[BundleProject])
 async def get_bundle_projects():
