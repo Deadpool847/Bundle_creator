@@ -217,6 +217,10 @@ async def generate_seo_keywords(project_name: str, description: str, custom_keyw
 
 def create_slideshow_video(image_paths, output_path, music_path=None, duration_per_image=3):
     """Create a slideshow video with transitions"""
+    if mp is None:
+        logging.warning("MoviePy not available, skipping video creation")
+        return False
+        
     try:
         clips = []
         
