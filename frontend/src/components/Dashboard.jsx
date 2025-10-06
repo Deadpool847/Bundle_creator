@@ -199,6 +199,7 @@ const Dashboard = () => {
                         <Button 
                           size="sm" 
                           className="btn-primary"
+                          onClick={() => handleDownload(project.id, project.name)}
                           data-testid={`download-${project.id}`}
                         >
                           <Download className="w-4 h-4 mr-2" />
