@@ -56,6 +56,28 @@ const Dashboard = () => {
     );
   };
 
+  const handleDownload = async (projectId, projectName) => {
+    try {
+      const response = await axios.get(`${API}/bundles/${projectId}/download`, {
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const blob = new Blob([response.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${projectName.replace(/\s+/g, '_')}_bundle.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download bundle. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen hero-gradient flex items-center justify-center">
