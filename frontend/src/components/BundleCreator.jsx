@@ -113,6 +113,29 @@ const BundleCreator = () => {
     });
   };
 
+  const downloadBundle = async (projectId, filename) => {
+    try {
+      const downloadResponse = await axios.get(
+        `${API}/bundles/${projectId}/download`,
+        { responseType: 'blob' }
+      );
+
+      // Create download link
+      const blob = new Blob([downloadResponse.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error("Failed to download bundle. Please try again.");
+    }
+  };
+
   const createBundle = async () => {
     if (!projectName.trim()) {
       toast.error("Please enter a project name");
@@ -164,7 +187,6 @@ const BundleCreator = () => {
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },
-          responseType: 'blob',
           onUploadProgress: (progressEvent) => {
             const uploadPercent = Math.round(
               (progressEvent.loaded * 40) / progressEvent.total
@@ -175,19 +197,14 @@ const BundleCreator = () => {
       );
 
       setProgress(100);
-
-      // Create download link
-      const blob = new Blob([processResponse.data]);
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `${projectName}_bundle.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-
-      toast.success("Bundle created successfully! Download started.");
+      
+      const bundleResponse = processResponse.data;
+      toast.success(`Bundle created successfully! (${Math.round(bundleResponse.file_size / 1024 / 1024 * 100) / 100} MB)`);
+      
+      // Trigger download automatically
+      setTimeout(() => {
+        downloadBundle(bundleResponse.project_id, bundleResponse.zip_filename);
+      }, 1000);
       
       // Reset form
       setTimeout(() => {

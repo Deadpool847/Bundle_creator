@@ -28,6 +28,29 @@ const Dashboard = () => {
     }
   };
 
+  const downloadBundle = async (projectId, filename) => {
+    try {
+      const downloadResponse = await axios.get(
+        `${API}/bundles/${projectId}/download`,
+        { responseType: 'blob' }
+      );
+
+      // Create download link
+      const blob = new Blob([downloadResponse.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      // Could add toast notification here if needed
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'completed':
@@ -54,6 +77,28 @@ const Dashboard = () => {
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>
     );
+  };
+
+  const handleDownload = async (projectId, projectName) => {
+    try {
+      const response = await axios.get(`${API}/bundles/${projectId}/download`, {
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const blob = new Blob([response.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${projectName.replace(/\s+/g, '_')}_bundle.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download bundle. Please try again.');
+    }
   };
 
   if (loading) {
@@ -177,11 +222,18 @@ const Dashboard = () => {
                         <Button 
                           size="sm" 
                           className="btn-primary"
+                          onClick={() => downloadBundle(project.id, project.zip_filename || `${project.name.replace(' ', '_')}_bundle.zip`)}
                           data-testid={`download-${project.id}`}
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </Button>
+                      )}
+                      
+                      {project.file_size && (
+                        <div className="text-xs text-slate-400 text-center">
+                          {Math.round(project.file_size / 1024 / 1024 * 100) / 100} MB
+                        </div>
                       )}
                     </div>
                   </div>
