@@ -196,31 +196,15 @@ const BundleCreator = () => {
         }
       );
 
-      setProgress(90);
-
-      // Get bundle info from response
-      const bundleInfo = processResponse.data;
-      
-      // Download the bundle using the new download endpoint
-      const downloadResponse = await axios.get(
-        `${API}/bundles/${project.id}/download`,
-        { responseType: 'blob' }
-      );
-
       setProgress(100);
-
-      // Create download link
-      const blob = new Blob([downloadResponse.data]);
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = bundleInfo.zip_filename || `${projectName}_bundle.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
-
-      toast.success(`Bundle created successfully! Downloaded ${bundleInfo.zip_filename}`);
+      
+      const bundleResponse = processResponse.data;
+      toast.success(`Bundle created successfully! (${Math.round(bundleResponse.file_size / 1024 / 1024 * 100) / 100} MB)`);
+      
+      // Trigger download automatically
+      setTimeout(() => {
+        downloadBundle(bundleResponse.project_id, bundleResponse.zip_filename);
+      }, 1000);
       
       // Reset form
       setTimeout(() => {
