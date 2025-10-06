@@ -199,12 +199,18 @@ const Dashboard = () => {
                         <Button 
                           size="sm" 
                           className="btn-primary"
-                          onClick={() => handleDownload(project.id, project.name)}
+                          onClick={() => downloadBundle(project.id, project.zip_filename || `${project.name.replace(' ', '_')}_bundle.zip`)}
                           data-testid={`download-${project.id}`}
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </Button>
+                      )}
+                      
+                      {project.file_size && (
+                        <div className="text-xs text-slate-400 text-center">
+                          {Math.round(project.file_size / 1024 / 1024 * 100) / 100} MB
+                        </div>
                       )}
                     </div>
                   </div>
