@@ -93,6 +93,9 @@ class BundleProject(BaseModel):
     platforms: List[str] = []
     created_at: datetime = Field(default_factory=datetime.utcnow)
     status: str = "processing"
+    completed_at: Optional[datetime] = None
+    zip_filename: Optional[str] = None
+    file_size: Optional[int] = None
 
 class BundleProjectCreate(BaseModel):
     name: str
