@@ -164,7 +164,6 @@ const BundleCreator = () => {
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },
-          responseType: 'blob',
           onUploadProgress: (progressEvent) => {
             const uploadPercent = Math.round(
               (progressEvent.loaded * 40) / progressEvent.total
@@ -174,20 +173,31 @@ const BundleCreator = () => {
         }
       );
 
+      setProgress(90);
+
+      // Get bundle info from response
+      const bundleInfo = processResponse.data;
+      
+      // Download the bundle using the new download endpoint
+      const downloadResponse = await axios.get(
+        `${API}/bundles/${project.id}/download`,
+        { responseType: 'blob' }
+      );
+
       setProgress(100);
 
       // Create download link
-      const blob = new Blob([processResponse.data]);
+      const blob = new Blob([downloadResponse.data]);
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `${projectName}_bundle.zip`;
+      link.download = bundleInfo.zip_filename || `${projectName}_bundle.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
 
-      toast.success("Bundle created successfully! Download started.");
+      toast.success(`Bundle created successfully! Downloaded ${bundleInfo.zip_filename}`);
       
       // Reset form
       setTimeout(() => {
