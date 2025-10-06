@@ -461,13 +461,16 @@ Description Templates:
             with open(bundle_dir / "SEO_KEYWORDS.txt", "w") as f:
                 f.write(seo_file_content)
             
-            # Create ZIP file
-            zip_path = temp_path / f"{project['name']}_bundle.zip"
-            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # Create ZIP file in memory
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for file_path in bundle_dir.rglob('*'):
                     if file_path.is_file():
                         arcname = file_path.relative_to(bundle_dir)
                         zipf.write(file_path, arcname)
+            
+            zip_buffer.seek(0)
+            zip_content = zip_buffer.getvalue()
             
             # Update project status
             await db.bundle_projects.update_one(
@@ -475,11 +478,12 @@ Description Templates:
                 {"$set": {"status": "completed", "completed_at": datetime.utcnow()}}
             )
             
-            # Return the ZIP file
-            return FileResponse(
-                path=str(zip_path),
-                filename=f"{project['name']}_bundle.zip",
-                media_type="application/zip"
+            # Return the ZIP file as streaming response
+            from fastapi.responses import Response
+            return Response(
+                content=zip_content,
+                media_type="application/zip",
+                headers={"Content-Disposition": f"attachment; filename={project['name']}_bundle.zip"}
             )
             
     except Exception as e:
