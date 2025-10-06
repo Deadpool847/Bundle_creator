@@ -18,8 +18,12 @@ from PIL import Image, ImageEnhance, ImageFilter
 import io
 import asyncio
 from emergentintegrations.llm.chat import LlmChat, UserMessage
-import moviepy.editor as mp
-from moviepy.video.fx.resize import resize
+try:
+    import moviepy.editor as mp
+    from moviepy.video.fx.resize import resize
+except ImportError:
+    # Fallback if moviepy is not available
+    mp = None
 import numpy as np
 
 ROOT_DIR = Path(__file__).parent
