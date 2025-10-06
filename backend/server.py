@@ -202,7 +202,7 @@ async def generate_seo_keywords(project_name: str, description: str, custom_keyw
         try:
             seo_data = json.loads(response)
             return SEOKeywords(**seo_data)
-        except:
+        except (json.JSONDecodeError, KeyError, TypeError):
             # Fallback if JSON parsing fails
             return SEOKeywords(
                 keywords=custom_keywords + [project_name.lower(), 'print on demand', 'digital art', 'commercial use', 'instant download'],
