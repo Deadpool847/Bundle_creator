@@ -28,6 +28,29 @@ const Dashboard = () => {
     }
   };
 
+  const downloadBundle = async (projectId, filename) => {
+    try {
+      const downloadResponse = await axios.get(
+        `${API}/bundles/${projectId}/download`,
+        { responseType: 'blob' }
+      );
+
+      // Create download link
+      const blob = new Blob([downloadResponse.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      // Could add toast notification here if needed
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'completed':
