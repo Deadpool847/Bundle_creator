@@ -113,6 +113,29 @@ const BundleCreator = () => {
     });
   };
 
+  const downloadBundle = async (projectId, filename) => {
+    try {
+      const downloadResponse = await axios.get(
+        `${API}/bundles/${projectId}/download`,
+        { responseType: 'blob' }
+      );
+
+      // Create download link
+      const blob = new Blob([downloadResponse.data]);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error("Failed to download bundle. Please try again.");
+    }
+  };
+
   const createBundle = async () => {
     if (!projectName.trim()) {
       toast.error("Please enter a project name");
