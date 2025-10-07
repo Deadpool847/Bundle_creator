@@ -1,0 +1,419 @@
+# Super Bundle Creator - Local Development Setup Guide
+
+## Prerequisites
+
+Before running this application locally, ensure you have the following installed:
+
+1. **Node.js** (v16 or higher)
+   - Download from: https://nodejs.org/
+   - Verify installation: `node --version` and `npm --version`
+
+2. **Python** (v3.9 or higher)
+   - Download from: https://python.org/
+   - Verify installation: `python --version` or `python3 --version`
+
+3. **MongoDB** (v5.0 or higher)
+   - Download from: https://mongodb.com/try/download/community
+   - Or use MongoDB Atlas (cloud): https://mongodb.com/atlas
+   - Verify installation: `mongod --version`
+
+4. **VS Code** (recommended)
+   - Download from: https://code.visualstudio.com/
+   - Recommended extensions (install from VS Code marketplace):
+     - Python (Microsoft)
+     - ES7+ React/Redux/React-Native snippets
+     - Prettier - Code formatter
+     - ESLint
+     - Thunder Client (for API testing)
+     - MongoDB for VS Code
+
+## Project Setup
+
+### 1. Clone or Download Project Files
+
+If you're setting up from scratch, create the following directory structure:
+
+```
+super-bundle-creator/
+├── backend/
+│   ├── server.py
+│   ├── requirements.txt
+│   └── .env
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── .env
+└── bundles/          # Will be created automatically
+```
+
+### 2. Open in VS Code
+
+```bash
+# Navigate to your project directory
+cd super-bundle-creator
+
+# Open in VS Code
+code .
+```
+
+## Backend Setup
+
+### 1. Create Python Virtual Environment (Recommended)
+
+```bash
+# Navigate to backend directory
+cd backend
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+```
+
+### 2. Install Python Dependencies
+
+```bash
+# Make sure you're in the backend directory with virtual environment activated
+pip install -r requirements.txt
+
+# If emergentintegrations fails, install manually:
+pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+```
+
+### 3. Setup Environment Variables
+
+Create `/backend/.env` file with the following content:
+
+```env
+MONGO_URL=mongodb://localhost:27017
+DB_NAME=bundle_creator_db
+CORS_ORIGINS=http://localhost:3000
+EMERGENT_LLM_KEY=sk-emergent-491D3816eDdA079C21
+
+# Optional: Add your own API keys if you prefer
+# OPENAI_API_KEY=your_openai_key_here
+```
+
+### 4. Test Backend
+
+```bash
+# In backend directory with virtual environment activated
+python server.py
+
+# Or use uvicorn directly:
+uvicorn server:app --reload --host 0.0.0.0 --port 8001
+```
+
+Backend should start on: http://localhost:8001
+
+## Frontend Setup
+
+### 1. Install Node Dependencies
+
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Or if you prefer yarn:
+yarn install
+```
+
+### 2. Setup Environment Variables
+
+Create `/frontend/.env` file with the following content:
+
+```env
+REACT_APP_BACKEND_URL=http://localhost:8001
+WDS_SOCKET_PORT=443
+```
+
+### 3. Test Frontend
+
+```bash
+# In frontend directory
+npm start
+
+# Or with yarn:
+yarn start
+```
+
+Frontend should start on: http://localhost:3000
+
+## Database Setup
+
+### Option 1: Local MongoDB
+
+1. **Install MongoDB Community Server**
+   - Download from: https://mongodb.com/try/download/community
+   - Follow installation instructions for your OS
+
+2. **Start MongoDB Service**
+   ```bash
+   # On Windows (as Administrator):
+   net start MongoDB
+
+   # On macOS:
+   brew services start mongodb-community
+
+   # On Linux:
+   sudo systemctl start mongod
+   ```
+
+3. **Verify MongoDB is Running**
+   ```bash
+   # Connect to MongoDB shell
+   mongosh
+   # Or older versions:
+   mongo
+   ```
+
+### Option 2: MongoDB Atlas (Cloud)
+
+1. **Create Free Account**
+   - Go to: https://mongodb.com/atlas
+   - Create free tier cluster
+
+2. **Get Connection String**
+   - Click "Connect" → "Connect your application"
+   - Copy the connection string
+
+3. **Update Backend .env**
+   ```env
+   MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/
+   DB_NAME=bundle_creator_db
+   ```
+
+## Running the Complete Application
+
+### 1. Start MongoDB (if using local)
+
+```bash
+# Make sure MongoDB is running
+mongod
+```
+
+### 2. Start Backend Server
+
+```bash
+# Terminal 1: Navigate to backend directory
+cd backend
+
+# Activate virtual environment
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# Start server
+python server.py
+```
+
+Backend will be available at: http://localhost:8001
+
+### 3. Start Frontend Development Server
+
+```bash
+# Terminal 2: Navigate to frontend directory
+cd frontend
+
+# Start React development server
+npm start
+```
+
+Frontend will be available at: http://localhost:3000
+
+## VS Code Development Tips
+
+### 1. Workspace Configuration
+
+Create `.vscode/settings.json` in project root:
+
+```json
+{
+    "python.defaultInterpreterPath": "./backend/venv/bin/python",
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true,
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/.git": true,
+        "**/venv": true,
+        "**/__pycache__": true
+    }
+}
+```
+
+### 2. Launch Configuration
+
+Create `.vscode/launch.json` for debugging:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Backend",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/server.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend"
+        }
+    ]
+}
+```
+
+### 3. Recommended VS Code Extensions
+
+- **Python** (Microsoft) - Python support
+- **Pylance** (Microsoft) - Python language server
+- **ES7+ React/Redux/React-Native snippets** - React snippets
+- **Prettier** - Code formatter
+- **ESLint** - JavaScript linting
+- **Thunder Client** - API testing
+- **MongoDB for VS Code** - Database management
+
+## API Testing
+
+### Using Thunder Client (VS Code Extension)
+
+1. Install Thunder Client extension
+2. Create new request
+3. Test endpoints:
+
+```
+GET http://localhost:8001/api/
+GET http://localhost:8001/api/platforms
+POST http://localhost:8001/api/bundles/create
+```
+
+### Using curl (Command Line)
+
+```bash
+# Test API root
+curl http://localhost:8001/api/
+
+# Get platform specifications
+curl http://localhost:8001/api/platforms
+
+# Create test bundle
+curl -X POST http://localhost:8001/api/bundles/create \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test Bundle","description":"Local test","platforms":["redbubble"],"custom_keywords":["test"]}'
+```
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+1. **Backend won't start**
+   ```bash
+   # Check if port 8001 is in use
+   lsof -i :8001  # macOS/Linux
+   netstat -ano | findstr :8001  # Windows
+   
+   # Kill process if needed
+   kill -9 <PID>  # macOS/Linux
+   taskkill /PID <PID> /F  # Windows
+   ```
+
+2. **Frontend won't start**
+   ```bash
+   # Clear npm cache
+   npm cache clean --force
+   
+   # Delete node_modules and reinstall
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+3. **MongoDB connection issues**
+   ```bash
+   # Check MongoDB status
+   brew services list | grep mongodb  # macOS
+   sudo systemctl status mongod  # Linux
+   
+   # Restart MongoDB
+   brew services restart mongodb-community  # macOS
+   sudo systemctl restart mongod  # Linux
+   ```
+
+4. **Python dependency issues**
+   ```bash
+   # Upgrade pip
+   pip install --upgrade pip
+   
+   # Install dependencies one by one
+   pip install fastapi uvicorn motor pymongo pillow
+   ```
+
+5. **CORS issues**
+   - Make sure CORS_ORIGINS in backend .env includes http://localhost:3000
+   - Check that REACT_APP_BACKEND_URL in frontend .env is http://localhost:8001
+
+### Environment Variables Issues
+
+If you see API errors:
+
+1. **Check .env files exist** in both backend/ and frontend/ directories
+2. **Restart both servers** after changing .env files
+3. **Verify environment variables** are loaded:
+   ```python
+   # In Python console
+   import os
+   print(os.environ.get('MONGO_URL'))
+   ```
+
+## Development Workflow
+
+1. **Start MongoDB** (if using local)
+2. **Start Backend** in one terminal
+3. **Start Frontend** in another terminal
+4. **Open VS Code** with both terminals visible
+5. **Use Thunder Client** or browser dev tools for API testing
+6. **Check browser console** for frontend errors
+7. **Check terminal output** for backend logs
+
+## File Structure Overview
+
+```
+super-bundle-creator/
+├── backend/
+│   ├── server.py           # Main FastAPI application
+│   ├── requirements.txt    # Python dependencies
+│   └── .env               # Backend environment variables
+├── frontend/
+│   ├── src/
+│   │   ├── App.js         # Main React component
+│   │   ├── App.css        # Global styles
+│   │   └── components/    # React components
+│   ├── package.json       # Node dependencies
+│   └── .env               # Frontend environment variables
+├── bundles/               # Generated bundle storage (auto-created)
+└── .vscode/               # VS Code configuration (optional)
+```
+
+## Production Considerations
+
+When deploying to production:
+
+1. **Environment Variables**: Update URLs and API keys
+2. **Database**: Use MongoDB Atlas or production MongoDB instance  
+3. **File Storage**: Consider cloud storage for bundle files
+4. **API Keys**: Use your own OpenAI/Claude API keys for better rate limits
+5. **HTTPS**: Enable SSL for production deployment
+
+## Support
+
+For issues specific to this application:
+1. Check terminal/console output for error messages
+2. Verify all environment variables are set correctly
+3. Ensure MongoDB is running and accessible
+4. Test API endpoints individually using Thunder Client
+5. Check network connectivity between frontend and backend
+
+Happy coding! 🚀
