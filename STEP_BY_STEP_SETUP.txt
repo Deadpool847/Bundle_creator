@@ -1,0 +1,498 @@
+# Super Bundle Creator - Step-by-Step Setup Commands
+
+## STEP 1: Install Prerequisites
+
+### 1.1 Install Node.js
+```bash
+# Download and install from: https://nodejs.org/ (LTS version)
+# After installation, verify:
+node --version
+npm --version
+```
+
+### 1.2 Install Python
+```bash
+# Download and install from: https://python.org/ (3.9+ version)
+# After installation, verify:
+python --version
+# OR
+python3 --version
+```
+
+### 1.3 Install MongoDB
+```bash
+# Option A: Download from https://mongodb.com/try/download/community
+# Option B: Use package manager
+
+# macOS (using Homebrew):
+brew tap mongodb/brew
+brew install mongodb-community
+
+# Ubuntu/Debian:
+sudo apt update
+sudo apt install mongodb
+
+# Windows: Download installer from MongoDB website
+```
+
+### 1.4 Install VS Code
+```bash
+# Download from: https://code.visualstudio.com/
+# Install these extensions in VS Code:
+# - Python (Microsoft)
+# - ES7+ React/Redux/React-Native snippets
+# - Prettier - Code formatter
+# - ESLint
+# - Thunder Client
+```
+
+## STEP 2: Create Project Directory
+
+```bash
+# Create main project folder
+mkdir super-bundle-creator
+cd super-bundle-creator
+
+# Create directory structure
+mkdir backend
+mkdir frontend
+mkdir bundles
+
+# Open in VS Code
+code .
+```
+
+## STEP 3: Setup Backend
+
+### 3.1 Create Backend Files
+```bash
+# Navigate to backend folder
+cd backend
+
+# Create Python virtual environment
+python -m venv venv
+# OR on some systems:
+python3 -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+```
+
+### 3.2 Create requirements.txt
+```bash
+# Create requirements.txt file (copy this content):
+cat > requirements.txt << 'EOF'
+fastapi==0.110.1
+uvicorn==0.25.0
+boto3>=1.34.129
+requests-oauthlib>=2.0.0
+cryptography>=42.0.8
+python-dotenv>=1.0.1
+pymongo==4.5.0
+pydantic>=2.6.4
+email-validator>=2.2.0
+pyjwt>=2.10.1
+passlib>=1.7.4
+tzdata>=2024.2
+motor==3.3.1
+pytest>=8.0.0
+black>=24.1.1
+isort>=5.13.2
+flake8>=7.0.0
+mypy>=1.8.0
+python-jose>=3.3.0
+requests>=2.31.0
+pandas>=2.2.0
+numpy>=1.26.0
+python-multipart>=0.0.9
+jq>=1.6.0
+typer>=0.9.0
+pillow>=10.0.0
+moviepy>=2.0.0
+emergentintegrations>=0.1.0
+EOF
+```
+
+### 3.3 Install Python Dependencies
+```bash
+# Make sure virtual environment is activated
+# Install dependencies
+pip install -r requirements.txt
+
+# If emergentintegrations fails, install manually:
+pip install emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/
+```
+
+### 3.4 Create Backend Environment File
+```bash
+# Create .env file
+cat > .env << 'EOF'
+MONGO_URL=mongodb://localhost:27017
+DB_NAME=bundle_creator_db
+CORS_ORIGINS=http://localhost:3000
+EMERGENT_LLM_KEY=sk-emergent-491D3816eDdA079C21
+EOF
+```
+
+### 3.5 Create server.py
+```bash
+# Download server.py from the project or copy the complete server.py content
+# This file contains the complete FastAPI backend code
+# (You'll need to copy the server.py content from the original project)
+```
+
+## STEP 4: Setup Frontend
+
+### 4.1 Navigate to Frontend Directory
+```bash
+# From project root
+cd ../frontend
+```
+
+### 4.2 Initialize React App (if starting fresh)
+```bash
+# Create React app
+npx create-react-app . --template typescript
+
+# OR if files already exist, just install dependencies:
+```
+
+### 4.3 Create package.json
+```bash
+# Create package.json with required dependencies:
+cat > package.json << 'EOF'
+{
+  "name": "super-bundle-creator-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-accordion": "^1.2.8",
+    "@radix-ui/react-alert-dialog": "^1.1.11",
+    "@radix-ui/react-aspect-ratio": "^1.1.4",
+    "@radix-ui/react-avatar": "^1.1.7",
+    "@radix-ui/react-checkbox": "^1.2.3",
+    "@radix-ui/react-collapsible": "^1.1.8",
+    "@radix-ui/react-context-menu": "^2.2.12",
+    "@radix-ui/react-dialog": "^1.1.11",
+    "@radix-ui/react-dropdown-menu": "^2.1.12",
+    "@radix-ui/react-hover-card": "^1.1.11",
+    "@radix-ui/react-label": "^2.1.4",
+    "@radix-ui/react-menubar": "^1.1.12",
+    "@radix-ui/react-navigation-menu": "^1.2.10",
+    "@radix-ui/react-popover": "^1.1.11",
+    "@radix-ui/react-progress": "^1.1.4",
+    "@radix-ui/react-radio-group": "^1.3.4",
+    "@radix-ui/react-scroll-area": "^1.2.6",
+    "@radix-ui/react-select": "^2.2.2",
+    "@radix-ui/react-separator": "^1.1.4",
+    "@radix-ui/react-slider": "^1.3.2",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-switch": "^1.2.2",
+    "@radix-ui/react-tabs": "^1.1.9",
+    "@radix-ui/react-toast": "^1.2.11",
+    "@radix-ui/react-toggle": "^1.1.6",
+    "@radix-ui/react-toggle-group": "^1.1.7",
+    "@radix-ui/react-tooltip": "^1.2.4",
+    "axios": "^1.8.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^4.1.0",
+    "embla-carousel-react": "^8.6.0",
+    "input-otp": "^1.4.2",
+    "lucide-react": "^0.507.0",
+    "next-themes": "^0.4.6",
+    "react": "^19.0.0",
+    "react-day-picker": "8.10.1",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.2",
+    "react-resizable-panels": "^3.0.1",
+    "react-router-dom": "^7.5.1",
+    "react-scripts": "5.0.1",
+    "sonner": "^2.0.3",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2",
+    "zod": "^3.24.4"
+  },
+  "scripts": {
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0",
+    "@eslint/js": "9.23.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "9.23.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.4",
+    "globals": "15.15.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17"
+  }
+}
+EOF
+```
+
+### 4.4 Install Frontend Dependencies
+```bash
+# Install all dependencies
+npm install
+
+# OR if you prefer yarn:
+yarn install
+```
+
+### 4.5 Create Frontend Environment File
+```bash
+# Create .env file
+cat > .env << 'EOF'
+REACT_APP_BACKEND_URL=http://localhost:8001
+WDS_SOCKET_PORT=443
+EOF
+```
+
+### 4.6 Create Tailwind Configuration
+```bash
+# Create tailwind.config.js
+cat > tailwind.config.js << 'EOF'
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [require("tailwindcss-animate")],
+}
+EOF
+```
+
+### 4.7 Create PostCSS Configuration
+```bash
+# Create postcss.config.js
+cat > postcss.config.js << 'EOF'
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+EOF
+```
+
+### 4.8 Create CRACO Configuration
+```bash
+# Create craco.config.js
+cat > craco.config.js << 'EOF'
+const path = require('path');
+
+module.exports = {
+  webpack: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
+};
+EOF
+```
+
+## STEP 5: Start MongoDB
+
+### 5.1 Start MongoDB Service
+```bash
+# Windows:
+net start MongoDB
+
+# macOS:
+brew services start mongodb-community
+# OR
+sudo mongod
+
+# Linux:
+sudo systemctl start mongod
+# OR
+sudo service mongodb start
+
+# Verify MongoDB is running:
+mongosh
+# OR
+mongo
+# Type 'exit' to close MongoDB shell
+```
+
+## STEP 6: Start the Application
+
+### 6.1 Start Backend Server
+```bash
+# Open new terminal in VS Code (Terminal → New Terminal)
+# Navigate to backend directory
+cd backend
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# Start the backend server
+python server.py
+
+# You should see:
+# INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+```
+
+### 6.2 Start Frontend Server
+```bash
+# Open another new terminal in VS Code
+# Navigate to frontend directory
+cd frontend
+
+# Start React development server
+npm start
+
+# Browser should automatically open http://localhost:3000
+# If not, manually open: http://localhost:3000
+```
+
+## STEP 7: Verify Setup
+
+### 7.1 Test Backend API
+```bash
+# Open new terminal and test:
+curl http://localhost:8001/api/
+
+# Should return: {"message":"Bundle Creation API Ready"}
+```
+
+### 7.2 Test Frontend
+```bash
+# Open browser and go to: http://localhost:3000
+# You should see the Super Bundle Creator interface
+```
+
+## STEP 8: Create Project Files (Copy these from original project)
+
+You need to copy these files from the original project:
+
+### Backend Files:
+- `/backend/server.py` - Complete FastAPI backend code
+
+### Frontend Files:
+- `/frontend/src/App.js` - Main React component
+- `/frontend/src/App.css` - Global styles
+- `/frontend/src/components/BundleCreator.jsx` - Bundle creation component  
+- `/frontend/src/components/Dashboard.jsx` - Dashboard component
+- All UI components in `/frontend/src/components/ui/` directory
+
+## QUICK START COMMANDS SUMMARY
+
+```bash
+# 1. Create project
+mkdir super-bundle-creator && cd super-bundle-creator
+mkdir backend frontend bundles
+
+# 2. Backend setup
+cd backend
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install fastapi uvicorn motor pymongo pillow moviepy python-dotenv
+# Copy server.py file
+# Create .env with MongoDB URL
+
+# 3. Frontend setup  
+cd ../frontend
+npm init -y
+npm install react react-dom react-scripts axios lucide-react sonner
+# Copy React component files
+# Create .env with backend URL
+
+# 4. Start MongoDB
+mongod  # or brew services start mongodb-community
+
+# 5. Run application
+# Terminal 1:
+cd backend && source venv/bin/activate && python server.py
+
+# Terminal 2: 
+cd frontend && npm start
+```
+
+## Troubleshooting Commands
+
+```bash
+# Check if ports are in use:
+lsof -i :3000  # Frontend port
+lsof -i :8001  # Backend port
+
+# Kill process if needed:
+kill -9 <PID>
+
+# Check MongoDB status:
+brew services list | grep mongodb  # macOS
+sudo systemctl status mongod  # Linux
+
+# Clear npm cache:
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+
+# Python virtual environment issues:
+deactivate
+rm -rf venv
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+## VS Code Setup
+
+### Install Extensions:
+1. Open VS Code
+2. Go to Extensions (Ctrl+Shift+X)
+3. Install:
+   - Python (Microsoft)
+   - ES7+ React/Redux/React-Native snippets  
+   - Prettier - Code formatter
+   - ESLint
+   - Thunder Client
+   - MongoDB for VS Code
+
+### Setup Debugging:
+Create `.vscode/launch.json`:
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Backend",
+            "type": "python", 
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/server.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/backend"
+        }
+    ]
+}
+```
+
+That's it! Follow these commands step by step and your Super Bundle Creator should be running locally! 🚀
