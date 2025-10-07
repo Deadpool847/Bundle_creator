@@ -1,0 +1,28 @@
+The comprehensive setup guide includes:
+
+📋 Prerequisites Section:
+
+Node.js, Python, MongoDB installation instructions
+VS Code and recommended extensions list
+🔧 Setup Instructions:
+
+Complete backend setup with virtual environment
+Frontend React app configuration
+Environment variables for both services
+Database setup (local MongoDB + MongoDB Atlas options)
+🚀 Development Workflow:
+
+Step-by-step running instructions
+VS Code workspace configuration
+Debugging setup with launch.json
+API testing with Thunder Client and curl
+🛠️ Troubleshooting Guide:
+
+Common issues and solutions
+Port conflicts, dependency problems
+CORS and environment variable fixes
+📁 File Structure Overview:
+
+Complete project organization
+Directory explanations
+Important configuration files
