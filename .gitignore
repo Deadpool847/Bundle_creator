@@ -98,3 +98,7 @@ bundles/f51a25ca-711c-4552-ac34-eecf0e77fd88/test_bundle.zip
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
